@@ -42,7 +42,7 @@ def add_book(request):
 
     return JsonResponse(response)
 
-@require_http_methods
+@require_http_methods(["GET"])
 def show_books(request):
     response = {}
     try:
