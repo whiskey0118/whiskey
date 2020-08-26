@@ -1,0 +1,11 @@
+声明：
+
+注意点1：
+当使用var a map[string]string   这样声明一个map类型数据时，map是为nil
+当使用a := make(map[string] string) 这样声明map时候，map并不是nil，而是空
+i := make(map[string]string)
+var g map[string]string
+fmt.Println(g==nil)
+fmt.Println(i==nil)
+
+test hahahaha111111111122233344
