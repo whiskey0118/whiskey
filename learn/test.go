@@ -2,54 +2,17 @@
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
-	"time"
 )
 
 func main() {
-	start := time.Now()
-	c := make(chan interface{})
-	ch1 := make(chan int)
-	ch2 := make(chan int)
-
-	go func() {
-		time.Sleep(4 * time.Second)
-		close(c)
-	}()
-
-	go func() {
-		time.Sleep(3 * time.Second)
-		ch1 <- 3
-	}()
-
-	go func() {
-		time.Sleep(3 * time.Second)
-	}()
-
-	fmt.Println("blocking on read")
-	select {
-	case <-c:
-		fmt.Printf("unblocked %v later \n", time.Since(start))
-	case <-ch1:
-		fmt.Println("ch1 case...")
-	case <-ch2:
-		fmt.Println("ch2 case...")
-	default:
-		fmt.Println("default go...")
+	a := sha1.New()
+	b, err := a.Write([]byte("sdf"))
+	if err != nil {
+		fmt.Println(err)
 	}
-
-}
-
-func test() {
-	a := time.NewTicker(time.Second)
-	defer a.Stop()
-	//done := make(chan struct{})
-	//select {
-	//case -> a:
-	//
-	//}
-	t := <-a.C
-	fmt.Printf("%T\n", t)
-	fmt.Printf("%s", t.String())
+	fmt.Println(b)
+	fmt.Printf("%x", a.Sum(nil))
 
 }
