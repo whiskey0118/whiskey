@@ -1,13 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-redis/redis"
+	"log"
 	"net"
 	"time"
+	"whiskey/conf"
 )
 
-func main() {
+var rc *redis.Client
+
+func init() {
 	redisOption := redis.Options{
 		Dialer: func() (conn net.Conn, err error) {
 			netDialer := &net.Dialer{
@@ -21,19 +24,16 @@ func main() {
 				Cancel:        nil,
 				Control:       nil,
 			}
-			return netDialer.Dial("tcp", "127.0.0.1:6379")
-		},
-
-		OnConnect: func(conn *redis.Conn) error {
-			fmt.Printf("conn=&s\n", conn)
-			return nil
+			return netDialer.Dial(conf.RedisConf["type"], conf.RedisConf["address"])
 		},
 	}
 
 	//go-redis项目中的NewClient 函数自动创建 连接池，states结构体中可以查看连接池的状态信息
 	rc := redis.NewClient(&redisOption)
-	defer rc.Close()
-
-	rc.Set("haha", "fuck", 10*time.Second)
-	fmt.Println(rc.PoolStats())
+	pong, err := rc.Ping().Result()
+	if err != redis.Nil {
+		log.Fatal("redis no found!")
+	} else {
+		log.Fatal("pong: ", pong)
+	}
 }

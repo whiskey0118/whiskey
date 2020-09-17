@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-redis/redis"
 	"time"
 )
@@ -12,6 +13,12 @@ func main() {
 	}
 	rdb := redis.NewClient(opt)
 
-	<-time.After(1 * time.Second)
+	ud := map[string]interface{}{
+		"Username":        "test",
+		"LoginErrorTimes": 0,
+		"Status":          "lock",
+	}
+	res := rdb.Set("userRd", ud, 30*time.Minute)
+	fmt.Println(res.Val())
 
 }

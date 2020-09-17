@@ -2,17 +2,27 @@
 package main
 
 import (
-	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 )
 
 func main() {
-	a := sha1.New()
-	b, err := a.Write([]byte("sdf"))
-	if err != nil {
-		fmt.Println(err)
+
+	type UserRd struct {
+		Username        string
+		LoginErrorTimes int
+		Status          string
 	}
-	fmt.Println(b)
-	fmt.Printf("%x", a.Sum(nil))
+
+	ud := UserRd{
+		Username:        "test",
+		LoginErrorTimes: 0,
+		Status:          "lock",
+	}
+	s, _ := json.Marshal(ud)
+	fmt.Printf("%s", string(s))
+	var p UserRd
+	json.Unmarshal([]byte(string(s)), p)
+	fmt.Println(p)
 
 }
