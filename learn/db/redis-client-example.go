@@ -15,10 +15,12 @@ func main() {
 
 	ud := map[string]interface{}{
 		"Username":        "test",
-		"LoginErrorTimes": 0,
+		"LoginErrorTimes": 1,
 		"Status":          "lock",
 	}
 	res := rdb.Set("userRd", ud, 30*time.Minute)
 	fmt.Println(res.Val())
+	user := rdb.Get("user").Val()
+	fmt.Println(user)
 
 }
