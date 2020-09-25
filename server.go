@@ -1,23 +1,33 @@
 package main
 
 import (
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"whiskey/models"
 )
 
+var upgrader = websocket.Upgrader{}
+
 func root(w http.ResponseWriter, r *http.Request) {
-	var (
-		user models.User
-		err  error
-	)
-
-	user.Username, err = r.Body
+	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("upgrader err:", err)
 	}
+	defer c.Close()
 
-	w.Write(rep)
+	for {
+		mt, p, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read message err: ", err)
+			break
+		}
+		log.Printf("recive: %s", p)
+		err = c.WriteMessage(mt, p)
+		if err != nil {
+			log.Println("write msg err: ", err)
+			break
+		}
+	}
 }
 
 func main() {
