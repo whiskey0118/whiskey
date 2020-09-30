@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"time"
 )
 
 func main() {
-
-	fmt.Println(time.Now())
-
-	//controllers.LoginController{}
+	var a string
+	flag.StringVar(&a, "config", "haha", "hahaa")
+	flag.Parse()
+	fmt.Println(a)
 }
