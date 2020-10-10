@@ -6,6 +6,9 @@ import (
 
 func main() {
 
-	a := []int{1, 2, 3, 4, 5}
-	fmt.Println(a[2:])
+	a := "11001"
+	for i, j := range a {
+		fmt.Println(i, string(j))
+	}
+	fmt.Println([]byte(a))
 }
