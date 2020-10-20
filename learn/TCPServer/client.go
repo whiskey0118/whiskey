@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -26,17 +25,15 @@ func main() {
 }
 
 func sender(conn *net.TCPConn) {
-	str := "client 1"
+	str := "This is client 1"
+	remoteAddr := conn.RemoteAddr().String()
 	buf := make([]byte, 1024)
 	msgBack, err := conn.Write([]byte(str))
-	if err != nil {
-		log.Fatal(conn.RemoteAddr().String(), "conn write err: ", err)
-		os.Exit(1)
-	}
-	msg, err := conn.Read(buf)
-	if err != nil {
-		log.Println("conn read err: ", err)
-	}
-	fmt.Println(conn.RemoteAddr().String(), "服务器反馈： ", string(buf[:msg]), msgBack, "；实际发送了", len(str))
+	CheckError(err)
+	LogOut(remoteAddr, msgBack, string(buf))
+	msgBack1, err := conn.Read(buf)
+	LogOut(remoteAddr, msgBack1, string(buf))
+	CheckError(err)
+
 	conn.Write([]byte("ok"))
 }

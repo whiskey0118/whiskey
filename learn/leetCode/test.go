@@ -1,15 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
-	a := 4
-	b := 3
-	a, b = b, a
-	fmt.Println("a", a)
-	fmt.Println("b", b)
-	//
-	//c := []int{1,2,3}
-	//fmt.Println(c[2])
-	//fmt.Println(len(c))
+	a := map[string]int{"four": 4, "one": 1}
+	//sort.Sort(a)
+	s1 := []string{"c", "a", "b", "2", "1"}
+	sort.Strings(s1)
+	fmt.Println(s1)
+	fmt.Println(a["one"])
+	fmt.Println(len(a))
+
 }
