@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
+	"time"
 )
 
 func main() {
@@ -25,15 +27,34 @@ func main() {
 }
 
 func sender(conn *net.TCPConn) {
-	str := "This is client 1"
+	str := os.Args
 	remoteAddr := conn.RemoteAddr().String()
 	buf := make([]byte, 1024)
 	msgBack, err := conn.Write([]byte(str))
-	CheckError(err)
-	LogOut(remoteAddr, msgBack, string(buf))
+	ErrorNotice1(err)
+	LogOut1(remoteAddr, msgBack, string(buf))
 	msgBack1, err := conn.Read(buf)
-	LogOut(remoteAddr, msgBack1, string(buf))
-	CheckError(err)
+	LogOut1(remoteAddr, msgBack1, string(buf))
+	ErrorNotice1(err)
 
 	conn.Write([]byte("ok"))
+}
+
+func ErrorFatal1(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func ErrorNotice1(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func LogOut1(ip string, msgRec int, msg string) {
+	t := time.Now().Format("2006-01-02 15:04:05")
+	res := "time:" + t + "  |ipaddr:" + ip + "  |receive byte:" + string(msgRec) + "  |msg:" + msg
+	fmt.Println(res)
 }
