@@ -22,22 +22,24 @@ func main() {
 	}
 
 	log.Println(conn.RemoteAddr().String(), "Connection successful")
-	sender(conn)
+	for {
+		sender(conn)
+	}
 
 }
 
 func sender(conn *net.TCPConn) {
-	str := os.Args
+	var str string
 	remoteAddr := conn.RemoteAddr().String()
 	buf := make([]byte, 1024)
-	msgBack, err := conn.Write([]byte(str))
-	ErrorNotice1(err)
-	LogOut1(remoteAddr, msgBack, string(buf))
-	msgBack1, err := conn.Read(buf)
-	LogOut1(remoteAddr, msgBack1, string(buf))
+
+	fmt.Scanln(&str)
+	strNum, _ := conn.Write([]byte(str))
+	msgBack1, err := conn.Read(buf[:strNum])
+	LogOut1(remoteAddr, msgBack1, string(buf[:msgBack1]))
 	ErrorNotice1(err)
 
-	conn.Write([]byte("ok"))
+	conn.Write([]byte("client had receive ack"))
 }
 
 func ErrorFatal1(err error) {
@@ -55,6 +57,6 @@ func ErrorNotice1(err error) {
 
 func LogOut1(ip string, msgRec int, msg string) {
 	t := time.Now().Format("2006-01-02 15:04:05")
-	res := "time:" + t + "  |ipaddr:" + ip + "  |receive byte:" + string(msgRec) + "  |msg:" + msg
+	res := "time:" + t + "  |ipAddr:" + ip + "  |receive byte:" + string(msgRec) + "  |msg:" + msg
 	fmt.Println(res)
 }

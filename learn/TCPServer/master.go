@@ -27,18 +27,22 @@ func main() {
 
 func HandleConnection(conn net.Conn) {
 	buf := make([]byte, 1024)
-	for {
-		msg, err := conn.Read(buf)
-		ErrorNotice(err)
-		//输出信息
-		fmt.Println(conn.RemoteAddr().String(), " receive data: ", string(buf[:msg]))
-		bufReturn := "我收到了"
-		//返回信息给客户端
-		msgR, err := conn.Write([]byte(bufReturn))
-		ErrorNotice(err)
-		fmt.Println(conn.RemoteAddr().String(), "客户端收到响应", string(buf[:msg]), "客户端收到了：", msgR)
-	}
+	remoteAddr := conn.RemoteAddr().String()
 	defer conn.Close()
+	for {
+		bufNum, err := conn.Read(buf)
+		//输出信息
+		if err != nil {
+			//如果客户端关闭，退出函数，继续接受连接，如果不退出函数，整个应用将关闭
+			log.Info("client has close")
+			return
+		}
+		LogOut(remoteAddr, 0, string(buf[:bufNum]))
+		bufReturn := "master had receive"
+		//返回信息给客户端
+		_, err = conn.Write([]byte(bufReturn))
+		ErrorNotice(err)
+	}
 }
 
 func ErrorFatal(err error) {
@@ -56,6 +60,6 @@ func ErrorNotice(err error) {
 
 func LogOut(ip string, msgRec int, msg string) {
 	t := time.Now().Format("2006-01-02 15:04:05")
-	res := "time:" + t + "  |ipaddr:" + ip + "  |receive byte:" + string(msgRec) + "  |msg:" + msg
+	res := "time:" + t + "  |ipAddr:" + ip + "  |receive byte:" + string(msgRec) + "  |msg:" + msg
 	fmt.Println(res)
 }
