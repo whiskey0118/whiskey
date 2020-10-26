@@ -2,29 +2,25 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"time"
+	"os"
 )
 
 func main() {
+	c, err := os.Open("F:\\我的\\go\\whiskey\\learn\\test1.go")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer c.Close()
 
-	var name string
-	var age int
-	var married bool
-	var delay time.Duration
-	flag.StringVar(&name, "name", "张三", "姓名")
-	flag.IntVar(&age, "age", 18, "年龄")
-	flag.BoolVar(&married, "married", false, "婚否")
-	flag.DurationVar(&delay, "d", 0, "延迟的时间间隔")
+	buf := make([]byte, 1024)
+	for {
+		n, err := c.Read(buf)
+		if err != nil {
+			return
+		}
+		fmt.Println(string(buf[:n]))
+		fmt.Println("_____")
+	}
 
-	//解析命令行参数
-	flag.Parse()
-	fmt.Println(name, age, married, delay)
-	//返回命令行参数后的其他参数
-	fmt.Println(flag.Args())
-	//返回命令行参数后的其他参数个数
-	fmt.Println(flag.NArg())
-	//返回使用的命令行参数个数
-	fmt.Println(flag.NFlag())
 }

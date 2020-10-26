@@ -1,5 +1,6 @@
 package main
 
+//
 //func ErrorFatal(err error) {
 //	if err != nil {
 //		fmt.Println(err)

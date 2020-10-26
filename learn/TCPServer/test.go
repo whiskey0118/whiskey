@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
 	var a string
@@ -10,4 +13,5 @@ func main() {
 		fmt.Println("err", err)
 	}
 	fmt.Println("b:", b, "a:", a, "c:", c)
+	sort.Slice()
 }

@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 //冒泡排序
 
 func main() {
@@ -17,9 +15,4 @@ func main() {
 	//}
 	//fmt.Println(num)
 
-	for i := 9; i < 10; i++ {
-		fmt.Println("yes")
-		fmt.Println(i)
-	}
-	fmt.Println("no")
 }
