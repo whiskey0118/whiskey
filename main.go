@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -11,8 +10,6 @@ import (
 	"os/signal"
 	"syscall"
 	"whiskey/proxy"
-	"whiskey/proxy/direct"
-	"whiskey/tools"
 )
 
 var (
@@ -34,51 +31,54 @@ func loadConfig(file string) (*Config, error) {
 	defer f.Close()
 	config := Config{}
 
-	buf := make([]byte,1024)
-	n,err := f.Read(buf)
-	err = json.Unmarshal(buf[:n],&config)
+	buf := make([]byte, 1024)
+	n, err := f.Read(buf)
+	err = json.Unmarshal(buf[:n], &config)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return &config,nil
+	return &config, nil
 }
 
 func main() {
-	flag.Parse()
-	path := tools.GetPath(*configFile)
-	config,err:=loadConfig(path)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//flag.Parse()
+	//path := tools.GetPath(*configFile)
+	//config,err:=loadConfig(path)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+
+	local := "vmesss://a684455c-b14f-11ea-bf0d-42010aaa0003@0.0.0.0:443?alterID=4&cert=<fix-me>&key=<fix-me>&fallback=:80"
+	remote := "direct://"
 
 	//创建一个服务端
-	localServer,err :=proxy.ServerFromURL(config.Local)
+	localServer, err := proxy.ServerFromURL(local)
 	if err != nil {
-		log.Fatal("create server err:",err)
+		log.Fatal("create server err:", err)
 		os.Exit(1)
 	}
 	defer localServer.Stop()
 
 	//创建客户端
-	remoteClient,err := proxy.ClientFromURL(config.Remote)
+	remoteClient, err := proxy.ClientFromURL(remote)
 	if err != nil {
-		log.Fatal("create client err:",err)
+		log.Fatal("create client err:", err)
 		os.Exit(1)
 	}
 
 	//directClient, _ := proxy.ClientFromURL("direct://")
 
 	//侦听本地端口
-	listener,err := net.Listen("tcp",localServer.Addr())
+	listener, err := net.Listen("tcp", localServer.Addr())
 	if err != nil {
-		log.Fatal("listen local port err :",localServer.Addr(),err)
+		log.Fatal("listen local port err :", localServer.Addr(), err)
 		os.Exit(1)
 	}
-	log.Printf("%v listening TCP on %v",localServer.Name(),localServer.Addr())
+	log.Printf("%v listening TCP on %v", localServer.Name(), localServer.Addr())
 	//创建协程接受连接
 	go func() {
 		for {
-			conn,err := listener.Accept()
+			conn, err := listener.Accept()
 			if err != nil {
 				log.Fatal(err)
 				break
@@ -88,21 +88,21 @@ func main() {
 			go func() {
 				defer conn.Close()
 				var client proxy.Client
-				wconn,targetAddr,err := localServer.Handshake(conn)
+				wconn, targetAddr, err := localServer.Handshake(conn)
 				if err != nil {
-					log.Fatal("failed in handshake:",err)
+					log.Fatal("failed in handshake:", err)
 					return
 				}
 
 				client = remoteClient
 				//连接客户端地址
 				clientAddr := remoteClient.Addr()
-				if _,ok := client.(*direct.Direct);ok{
+				if _, ok := client.(*proxy.Direct); ok {
 					clientAddr = targetAddr.String()
 				}
-				rc,err := net.Dial("tcp",clientAddr)
+				rc, err := net.Dial("tcp", clientAddr)
 				if err != nil {
-					log.Fatal("dial client err :",err)
+					log.Fatal("dial client err :", err)
 					return
 				}
 				defer rc.Close()
@@ -123,10 +123,8 @@ func main() {
 	}()
 
 	{
-		osSignals := make(chan os.Signal,1)
-		signal.Notify(osSignals,os.Interrupt,os.Kill,syscall.SIGTERM)
+		osSignals := make(chan os.Signal, 1)
+		signal.Notify(osSignals, os.Interrupt, os.Kill, syscall.SIGTERM)
 		<-osSignals
 	}
 }
-
-

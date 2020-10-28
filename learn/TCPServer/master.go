@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/prometheus/common/log"
+	"log"
 	"net"
 	"os"
 	"time"
@@ -11,7 +11,7 @@ import (
 func main() {
 	netListener, err := net.Listen("tcp", "127.0.0.1:9090")
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
 	}
 	defer netListener.Close()
 
@@ -34,7 +34,7 @@ func HandleConnection(conn net.Conn) {
 		//输出信息
 		if err != nil {
 			//如果客户端关闭，退出函数，继续接受连接，如果不退出函数，整个应用将关闭
-			log.Info("client has close")
+			log.Println("client has close")
 			return
 		}
 		LogOut(remoteAddr, 0, string(buf[:bufNum]))

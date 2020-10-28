@@ -1,20 +1,18 @@
-package direct
+package proxy
 
 import (
 	"io"
 	"net"
 	"net/url"
-
-	"github.com/jarvisgally/v2simple/proxy"
 )
 
 const name = "direct"
 
 func init() {
-	proxy.RegisterClient(name, NewDirectClient)
+	RegisterClient(name, NewDirectClient)
 }
 
-func NewDirectClient(url *url.URL) (proxy.Client, error) {
+func NewDirectClient(url *url.URL) (Client, error) {
 	return &Direct{}, nil
 }
 
