@@ -1,14 +1,32 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+	"fmt"
+	"log"
+	"strings"
+)
+
+type Arg []string
+
+func (c *Arg) String() string {
+	return strings.Join([]string(*c), " ")
+}
+
+// Set is the method flag package calls
+func (c *Arg) Set(value string) error {
+	*c = append(*c, value)
+	return nil
+}
 
 func main() {
-	a := 10
-	b := 20
-	a = a ^ b
-	b = a ^ b
-	a = a ^ b
-	fmt.Println("a:", a, "b:", b)
+
+	//haha := flag.String("haha","rest","sdfsdf")
+	var conf Arg
+	flag.Var(&conf, "haha", "test")
+	flag.Parse()
+	log.SetFlags(0)
+	fmt.Println(conf)
 }
 
 func test(nums []int) int {
