@@ -1,13 +1,14 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 )
 
 func main() {
-	var a string
-	flag.StringVar(&a, "config", "haha", "hahaa")
-	flag.Parse()
-	fmt.Println(a)
+	a := "a"
+	b := "b"
+	fmt.Println(&a)
+	fmt.Println(&b)
+	fmt.Println(a < b)
+
 }
