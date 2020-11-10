@@ -28,7 +28,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-	http.HandleFunc("/", web.PostDevice)
+	http.HandleFunc("/postDevice", web.PostDevice)
+	http.HandleFunc("/read", web.ReadMessage)
 	err := http.ListenAndServe("localhost:8089", nil)
 	if err != nil {
 		log.Fatal("listen 8080 err:", err)
