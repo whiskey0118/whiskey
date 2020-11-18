@@ -15,3 +15,17 @@ func main() {
 	fmt.Println(len(a))
 
 }
+
+func inorderTraversal1(root *TreeNode) []int {
+
+}
+
+func test(root *TreeNode) []int {
+	var res []int
+	if root == nil {
+		return []int{}
+	}
+
+	res = append(res, test())
+
+}
