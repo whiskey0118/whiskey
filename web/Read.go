@@ -26,6 +26,10 @@ func ReadMessage(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("create client fail: ", err)
 	}
 
-	client.ReadMessage()
+	go func() {
+		mes, _ := client.ReadMessage()
+		log.Printf("%s", mes)
+		defer client.Close()
+	}()
 
 }

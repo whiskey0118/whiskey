@@ -1,30 +1,37 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
-type Mes struct {
-	Name    string
-	InChan  chan string
-	OutChan chan string
+type Messages struct {
+	Name string
+	Body string
+}
+
+//func main() {
+//	var mes Message
+//	mes.name = "test"
+//	res,_ := json.Marshal(&mes)
+//	fmt.Println(string(res))
+//	fmt.Printf("%s",string(res))
+//}
+
+type Product struct {
+	Name      string
+	ProductID int64
 }
 
 func main() {
-	mes := Mes{
-		Name:    "mes",
-		InChan:  make(chan string),
-		OutChan: nil,
-	}
-	go func() {
-		for i := 0; i < 10; i++ {
-			fmt.Printf("go son ...%d\n", i)
-		}
-		mes.InChan <- "sdfsd"
-	}()
+	var p Product
+	p.Name = "Xiao mi 6"
+	p.ProductID = 1
+	data, _ := json.Marshal(&p)
+	fmt.Println(string(data))
 
-	//for i:= range mes.InChan{
-	//	fmt.Printf("%s",i)
-	//}
-	res := <-mes.InChan
-	fmt.Println(res)
-
+	var mes Messages
+	mes.Name = "test"
+	res, _ := json.Marshal(&mes)
+	fmt.Println(string(res))
 }

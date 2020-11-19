@@ -4,6 +4,6 @@ import "time"
 
 type Message struct {
 	Time time.Time
-	Type int    `json:"type"`
+	Type string `json:"type"`
 	Body string `json:"body"`
 }
