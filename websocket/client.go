@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 type Client struct {
@@ -10,7 +11,8 @@ type Client struct {
 	Pool    *Pool
 	InChan  chan *Message
 	OutChan chan *Message
-	Token   string
+
+	Token string
 }
 
 func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) (client *Client, err error) {
@@ -26,7 +28,11 @@ func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) 
 }
 
 func (client *Client) ReadMessage() (message *Message, err error) {
-	message = <-client.InChan
+	go func() {
+		mes := <-client.InChan
+		log.Printf("%s", mes)
+		defer client.Close()
+	}()
 	return
 }
 

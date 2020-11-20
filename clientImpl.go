@@ -39,12 +39,12 @@ func main() {
 	go func() {
 		defer close(done)
 		for {
-			_, message, err := conn.ReadMessage()
+			_, _, err := conn.ReadMessage()
 			if err != nil {
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("recv: %s", message)
+			//log.Printf("recv: %s", message)
 		}
 	}()
 
@@ -55,7 +55,7 @@ func main() {
 		select {
 		case <-tic.C:
 			mess.Body = time.Now().String()
-			mess.Type = "info"
+			mess.Type = "client1"
 			res, _ := json.Marshal(&mess)
 			conn.WriteMessage(websocket.TextMessage, res)
 		case <-done:
