@@ -1,18 +1,23 @@
 package websocket
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"os"
+	"time"
 )
 
 type Client struct {
-	Device  *Device
-	Conn    *websocket.Conn
-	Pool    *Pool
-	InChan  chan *Message
-	OutChan chan *Message
-
-	Token string
+	Device    *Device
+	Conn      *websocket.Conn
+	Pool      *Pool
+	InChan    chan *Message
+	OutChan   chan *Message
+	Done      chan int
+	Interrupt chan os.Signal
+	Token     string
 }
 
 func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) (client *Client, err error) {
@@ -27,13 +32,32 @@ func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) 
 	return
 }
 
-func (client *Client) ReadMessage() (message *Message, err error) {
-	go func() {
-		mes := <-client.InChan
-		log.Printf("%s", mes)
-		defer client.Close()
-	}()
-	return
+func (client *Client) ReadMessage() (mess *Message, err error) {
+	tic := time.NewTicker(2 * time.Second)
+	defer tic.Stop()
+
+	for {
+		select {
+		case <-tic.C:
+			mess.Body = time.Now().String()
+			mess.Type = client.Device.Uid
+			res, _ := json.Marshal(&mess)
+			err = client.Conn.WriteMessage(websocket.TextMessage, res)
+			if err != nil {
+				log.Printf("%s write err ", client.Device.Uid)
+			}
+		case <-client.Done:
+			return
+		case <-client.Interrupt:
+			log.Println("interrupt")
+			err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
+			if err != nil {
+				log.Println("write close:", err)
+				return
+			}
+			return
+		}
+	}
 }
 
 func (client *Client) WriteMessage(message *Message) (err error) {
