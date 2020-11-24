@@ -16,7 +16,7 @@ type Client struct {
 	InChan    chan *Message
 	OutChan   chan *Message
 	Done      chan int
-	Interrupt chan os.Signal
+	Interrupt chan os.Signal //捕捉客户端进程关闭信号
 	Token     string
 }
 

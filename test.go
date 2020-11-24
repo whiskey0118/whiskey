@@ -16,12 +16,18 @@ func main() {
 	//http.ListenAndServe("127.0.0.1:8080", nil)
 
 	TestGoWithChannel()
+	da := []byte(string("bb"))
+	data(da)
+	da = []byte(string("cc"))
+	var a rune
+	fmt.Printf("%s", da)
 }
 
-//func (mes *Mes) Read()(str string) {
-//	str = <-mes.OutChan
-//	return
-//}
+func data(da []byte) error {
+	da = []byte(string("aa"))
+	fmt.Printf("func in %s", da)
+	return nil
+}
 
 func testBoringWithChannel(msg string, c chan string) {
 	for i := 0; ; i++ {
