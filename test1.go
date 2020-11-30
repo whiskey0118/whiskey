@@ -19,19 +19,28 @@ type Messages struct {
 //}
 
 type Product struct {
-	Name      string
-	ProductID int64
+	time string
+	int64
 }
 
 func main() {
-	var p Product
-	p.Name = "Xiao mi 6"
-	p.ProductID = 1
-	data, _ := json.Marshal(&p)
-	fmt.Println(string(data))
+	var p Messages
+	//p.Name = "Xiao mi 6"
+	//p.ProductID = 1
+	//data, _ := json.Marshal(&p)
+	//fmt.Println(string(data))
+	//
+	//var mes Messages
+	//mes.Name = "test"
+	//res, _ := json.Marshal(&mes)
+	//fmt.Println(string(res))
 
-	var mes Messages
-	mes.Name = "test"
-	res, _ := json.Marshal(&mes)
-	fmt.Println(string(res))
+	t := `{"name":"client1","body":"test"}`
+	fmt.Println(t)
+	err := json.Unmarshal([]byte(t), &p)
+	if err != nil {
+		fmt.Printf("err:", err)
+	}
+	fmt.Println(p)
+
 }

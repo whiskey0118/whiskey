@@ -1,9 +1,7 @@
 package websocket
 
-import "time"
-
 type Message struct {
-	Time time.Time
+	//Time time.Time `json:"time"`
 	Type string `json:"type"`
 	Body string `json:"body"`
 }

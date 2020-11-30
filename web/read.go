@@ -1,6 +1,8 @@
 package web
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -18,18 +20,32 @@ func init() {
 
 func ReadMessage(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal()
-	}
 	client, err := websocket2.InitClient(conn, nil, nil, "")
 	if err != nil {
 		log.Fatal("create client fail: ", err)
 	}
 
 	go func() {
-		mes, _ := client.ReadMessage()
-		log.Printf("%s", mes)
-		defer client.Close()
+		var message websocket2.Message
+
+		_, b, err := client.Conn.ReadMessage()
+
+		//b,err := ioutil.ReadAll(r.Body)
+		//defer r.Body.Close()
+		if err != nil {
+			fmt.Println("read body err:", err)
+		}
+		err = json.Unmarshal(b, &message)
+		fmt.Println(string(b))
+		fmt.Println(message)
+		if err != nil {
+			log.Printf("client addr:%s message:json unmarshal err %s", r.RemoteAddr, err)
+			//_,err=w.Write([]byte("bad body ,please check you data"))
+			return
+		}
+		client.InChan <- &message
 	}()
+
+	go client.ReadMessage()
 
 }

@@ -1,12 +1,10 @@
 package websocket
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"os"
-	"time"
 )
 
 type Client struct {
@@ -32,20 +30,14 @@ func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) 
 	return
 }
 
-func (client *Client) ReadMessage() (mess *Message, err error) {
-	tic := time.NewTicker(2 * time.Second)
-	defer tic.Stop()
+func (client *Client) ReadMessage() {
+	//tic := time.NewTicker(2 * time.Second)
+	//defer tic.Stop()
 
 	for {
 		select {
-		case <-tic.C:
-			mess.Body = time.Now().String()
-			mess.Type = client.Device.Uid
-			res, _ := json.Marshal(&mess)
-			err = client.Conn.WriteMessage(websocket.TextMessage, res)
-			if err != nil {
-				log.Printf("%s write err ", client.Device.Uid)
-			}
+		case message := <-client.InChan:
+			log.Printf("Read message uid:%s message:%s", client.Device.Uid, message.Body)
 		case <-client.Done:
 			return
 		case <-client.Interrupt:
@@ -55,14 +47,27 @@ func (client *Client) ReadMessage() (mess *Message, err error) {
 				log.Println("write close:", err)
 				return
 			}
+			client.Close()
 			return
 		}
 	}
 }
 
-func (client *Client) WriteMessage(message *Message) (err error) {
-	client.OutChan <- message
-	return
+func (client *Client) WriteMessage(message *Message) {
+	for {
+		select {
+		case client.OutChan <- message:
+			log.Printf("Write message to uid:%s message:%s", client.Device.Uid, message.Body)
+		case <-client.Interrupt:
+			log.Println("interrupt")
+			err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
+			if err != nil {
+				log.Println("write close:", err)
+				return
+			}
+			client.Close()
+		}
+	}
 }
 
 func (client *Client) Close() {

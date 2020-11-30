@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	url2 "net/url"
@@ -36,17 +37,17 @@ func main() {
 
 	done := make(chan struct{})
 
-	go func() {
-		defer close(done)
-		for {
-			_, _, err := conn.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-			//log.Printf("recv: %s", message)
-		}
-	}()
+	//go func() {
+	//	defer close(done)
+	//	for {
+	//		_, _, err := conn.ReadMessage()
+	//		if err != nil {
+	//			log.Println("read:", err)
+	//			return
+	//		}
+	//		//log.Printf("recv: %s", message)
+	//	}
+	//}()
 
 	tic := time.NewTicker(2 * time.Second)
 	defer tic.Stop()
@@ -54,12 +55,13 @@ func main() {
 	for {
 		select {
 		case <-tic.C:
-			mess.Body = time.Now().String()
+			mess.Body = "test"
 			mess.Type = "client1"
 			res, _ := json.Marshal(&mess)
+			fmt.Println(string(res))
 			conn.WriteMessage(websocket.TextMessage, res)
-		case <-done:
-			return
+		//case <-done:
+		//	return
 		case <-interrup:
 			log.Println("interrupt")
 

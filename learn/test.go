@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,12 +27,15 @@ func Cleaner(w http.ResponseWriter, r *http.Request) {
 	//w.Write(b)
 
 	// Unmarshal
-	var msg Message
+	//var msg Message
+	msg := Message{}
 	err = json.Unmarshal(b, &msg)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+	fmt.Println(msg)
+	fmt.Printf("id:%d,name:%s", msg.Id, msg.Name)
 
 	output, err := json.Marshal(msg)
 	if err != nil {
