@@ -2,56 +2,32 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
+	"time"
 )
 
-type Message struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+func Chann(ch chan int, stopCh chan bool) {
+	var i int
+	i = 10
+	for j := 0; j < 10; j++ {
+		ch <- i
+		time.Sleep(time.Second)
+	}
+	stopCh <- true
 }
 
-// curl localhost:8000 -d '{"name":"Hello"}'
-func Cleaner(w http.ResponseWriter, r *http.Request) {
-	// Read body
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	//log.Printf("%s",b)
-	//w.Write(b)
-
-	// Unmarshal
-	//var msg Message
-	msg := Message{}
-	err = json.Unmarshal(b, &msg)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	fmt.Println(msg)
-	fmt.Printf("id:%d,name:%s", msg.Id, msg.Name)
-
-	output, err := json.Marshal(msg)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	//w.Header().Set("content-type", "application/json")
-	w.Write(output)
+type Messages1 struct {
+	//Time time.Time `json:"time"`
+	Type string `json:"type"`
+	Body string `json:"body"`
 }
 
 func main() {
-	http.HandleFunc("/", Cleaner)
-	address := ":8000"
-	log.Println("Starting server on address", address)
-	err := http.ListenAndServe(address, nil)
-	if err != nil {
-		panic(err)
+
+	mes := &Messages1{
+		Type: "test",
+		Body: "haha",
 	}
+
+	log.Printf("%s,%s", mes.Body, mes.Type)
 }

@@ -13,7 +13,7 @@ type Client struct {
 	Pool      *Pool
 	InChan    chan *Message
 	OutChan   chan *Message
-	Done      chan int
+	Done      chan bool
 	Interrupt chan os.Signal //捕捉客户端进程关闭信号
 	Token     string
 }
@@ -34,23 +34,26 @@ func (client *Client) ReadMessage() {
 	//tic := time.NewTicker(2 * time.Second)
 	//defer tic.Stop()
 
-	for {
-		select {
-		case message := <-client.InChan:
-			log.Printf("Read message uid:%s message:%s", client.Device.Uid, message.Body)
-		case <-client.Done:
-			return
-		case <-client.Interrupt:
-			log.Println("interrupt")
-			err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
-			if err != nil {
-				log.Println("write close:", err)
-				return
-			}
-			client.Close()
+	//for {
+	select {
+	case message := <-client.InChan:
+		//刚开始因为下面这行总是报错：panic: runtime error: invalid memory address or nil pointer dereference，原来自己的client.Device.Uid 没有赋值，还是nil -。-
+		//log.Printf("Read message uid:%s message:%s", client.Device.Uid, message.Body)
+		log.Printf("Read message type:%v message:%v", message.Type, message.Body)
+	case <-client.Done:
+		client.Close()
+		return
+	case <-client.Interrupt:
+		log.Println("interrupt")
+		err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
+		if err != nil {
+			log.Println("write close:", err)
 			return
 		}
+		client.Close()
+		return
 	}
+	//}
 }
 
 func (client *Client) WriteMessage(message *Message) {

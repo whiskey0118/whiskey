@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -34,6 +33,11 @@ type Messages struct {
 	Body string `json:"body"`
 }
 
+type Clientest struct {
+	Mes string
+	Ch  chan string
+}
+
 func test(w http.ResponseWriter, r *http.Request) {
 	// r.ParseForm()
 	defer fmt.Fprintf(w, "ok\n")
@@ -44,15 +48,23 @@ func test(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("read body err, %v\n", err)
 		return
 	}
-	println("json:", string(body))
-
-	var a Messages
-	if err = json.Unmarshal(body, &a); err != nil {
-		fmt.Printf("Unmarshal err, %v\n", err)
-		return
+	cli := Clientest{
+		Mes: "",
+		Ch:  make(chan string),
 	}
-	fmt.Printf("%+v", a)
 
+	var a string
+	a = string(body)
+	//fmt.Printf("a:",a)
+	cli.Ch <- a
+	go test1(&cli)
+}
+
+func test1(cli *Clientest) {
+	select {
+	case mes := <-cli.Ch:
+		fmt.Printf("mes:", mes)
+	}
 }
 
 func main() {

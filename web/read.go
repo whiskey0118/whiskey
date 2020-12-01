@@ -27,25 +27,24 @@ func ReadMessage(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		var message websocket2.Message
-
-		_, b, err := client.Conn.ReadMessage()
-
-		//b,err := ioutil.ReadAll(r.Body)
-		//defer r.Body.Close()
-		if err != nil {
-			fmt.Println("read body err:", err)
+		for {
+			_, b, err := client.Conn.ReadMessage()
+			if err != nil {
+				fmt.Println("read body err:", err)
+				break
+			}
+			err = json.Unmarshal(b, &message)
+			if err != nil {
+				log.Printf("client addr:%s message:json unmarshal err %s", r.RemoteAddr, err)
+				return
+			}
+			client.InChan <- &message
 		}
-		err = json.Unmarshal(b, &message)
-		fmt.Println(string(b))
-		fmt.Println(message)
-		if err != nil {
-			log.Printf("client addr:%s message:json unmarshal err %s", r.RemoteAddr, err)
-			//_,err=w.Write([]byte("bad body ,please check you data"))
-			return
-		}
-		client.InChan <- &message
 	}()
 
-	go client.ReadMessage()
-
+	go func() {
+		for {
+			client.ReadMessage()
+		}
+	}()
 }
