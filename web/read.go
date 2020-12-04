@@ -1,8 +1,6 @@
 package web
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -19,32 +17,18 @@ func init() {
 }
 
 func ReadMessage(w http.ResponseWriter, r *http.Request) {
+	//忘记处理这个错误，导致在浏览器访问进来的连接不是websocket类型，就会导致整个进程挂掉
 	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("Remote addr:%v, err: %v", r.RemoteAddr, err)
+		return
+	}
 	client, err := websocket2.InitClient(conn, nil, nil, "")
 	if err != nil {
 		log.Fatal("create client fail: ", err)
 	}
 
-	go func() {
-		var message websocket2.Message
-		for {
-			_, b, err := client.Conn.ReadMessage()
-			if err != nil {
-				fmt.Println("read body err:", err)
-				break
-			}
-			err = json.Unmarshal(b, &message)
-			if err != nil {
-				log.Printf("client addr:%s message:json unmarshal err %s", r.RemoteAddr, err)
-				return
-			}
-			client.InChan <- &message
-		}
-	}()
+	go client.WriteMessage()
 
-	go func() {
-		for {
-			client.ReadMessage()
-		}
-	}()
+	go client.ReadMessage()
 }

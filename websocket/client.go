@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
@@ -31,32 +32,46 @@ func InitClient(conn *websocket.Conn, device *Device, pool *Pool, token string) 
 }
 
 func (client *Client) ReadMessage() {
-	//tic := time.NewTicker(2 * time.Second)
-	//defer tic.Stop()
-
-	//for {
-	select {
-	case message := <-client.InChan:
-		//刚开始因为下面这行总是报错：panic: runtime error: invalid memory address or nil pointer dereference，原来自己的client.Device.Uid 没有赋值，还是nil -。-
-		//log.Printf("Read message uid:%s message:%s", client.Device.Uid, message.Body)
-		log.Printf("Read message type:%v message:%v", message.Type, message.Body)
-	case <-client.Done:
-		client.Close()
-		return
-	case <-client.Interrupt:
-		log.Println("interrupt")
-		err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
-		if err != nil {
-			log.Println("write close:", err)
+	for {
+		select {
+		case message := <-client.InChan:
+			//刚开始因为下面这行总是报错：panic: runtime error: invalid memory address or nil pointer dereference，原来自己的client.Device.Uid 没有赋值，还是nil -。-
+			//log.Printf("Read message uid:%s message:%s", client.Device.Uid, message.Body)
+			log.Printf("Read message type:%v message:%v", message.Type, message.Body)
+		case <-client.Done:
+			client.Close()
+			return
+		case <-client.Interrupt:
+			log.Println("interrupt")
+			err := client.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, fmt.Sprintf("%s closed connection", client.Device.Uid)))
+			if err != nil {
+				log.Println("write close:", err)
+				return
+			}
+			client.Close()
 			return
 		}
-		client.Close()
-		return
 	}
-	//}
 }
 
-func (client *Client) WriteMessage(message *Message) {
+func (client *Client) WriteMessage() {
+	var message Message
+	for {
+		_, b, err := client.Conn.ReadMessage()
+		if err != nil {
+			fmt.Println("read body err:", err)
+			break
+		}
+		err = json.Unmarshal(b, &message)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		client.InChan <- &message
+	}
+}
+
+func (client *Client) Broadcast(message *Message) {
 	for {
 		select {
 		case client.OutChan <- message:
@@ -71,6 +86,10 @@ func (client *Client) WriteMessage(message *Message) {
 			client.Close()
 		}
 	}
+}
+
+func (client *Client) Send() {
+
 }
 
 func (client *Client) Close() {
