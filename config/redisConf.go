@@ -1,4 +1,4 @@
-package conf
+package config
 
 var RedisConf = map[string]string{
 	"name":    "redis",
