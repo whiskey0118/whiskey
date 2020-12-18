@@ -6,6 +6,32 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
+type Store interface {
+	Set()
+	Get()
+}
+
+type CTest struct {
+	Name string
+	Age  int
+}
+
+type Ha struct {
+	St   Store
+	Name string
+}
+
+func (c *CTest) Set() {
+
+}
+func (c *CTest) Get() {
+
+}
+
+func test() {
+	//c :=
+}
+
 var ctx = context.Background()
 
 func ExampleClient() {
@@ -35,8 +61,4 @@ func ExampleClient() {
 		fmt.Println("key2", val2)
 	}
 	// Output: key value
-}
-
-func main() {
-	ExampleClient()
 }
